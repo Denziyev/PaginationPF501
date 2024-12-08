@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products with Pagination</title>
+  <style>
+    /* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+header {
+  text-align: center;
+  padding: 20px;
+  background-color: #0073e6;
+  color: white;
+}
+
+main {
+  padding: 20px;
+}
+
+.products-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 15px;
+}
+
+.product-card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+
+
+.product-card h2 {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+.product-card p {
+  margin: 5px 0;
+}
+
+.product-card .price {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.pagination-container {
+  text-align: center;
+}
+
+.pagination-container .page {
+  display: inline-block;
+  margin: 0 5px;
+  padding: 10px 15px;
+  background-color: #0073e6;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination-container .page.active {
+  background-color: #005bb5;
+  pointer-events: none;
+}
+
+.pagination-container .page:hover {
+  background-color: #005bb5;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Products</h1>
+  </header>
+  <main>
+    <div id="products-container" class="products-container"></div>
+    <div id="pagination-container" class="pagination-container"></div>
+  </main>
+  <script>
+        const productsContainer=document.querySelector('#products-container');
+        const paginationContainer=document.querySelector('#pagination-container');
+
+        let currentPage=1;
+        let PageSize=10;
+        async function renderProductsContainer(){
+            
+            let start=(currentPage-1)*PageSize;
+            let end=start+PageSize;
+            
+            
+            let data= await fetch('http://localhost:3000/products')
+            .then(res=>res.json());
+            let a= Array.from(data);
+            console.log(start);
+            console.log(end);
+            a=a.slice(start,end);
+            productsContainer.innerHTML='';
+           a.forEach(element=>{
+            let productCard=document.createElement('div');
+            productCard.className="product-card";
+            productCard.innerHTML+=`
+            <img src="${element.image}" alt="Product 3">
+                <h2>${element.name}</h2>
+                <p>${element.description}</p>
+                <p class="price">$${element.price}</p>`;
+                let btn=document.createElement('button');
+                btn.className="btn";
+                btn.textContent="Add to Card";
+                productCard.appendChild(btn);
+            productsContainer.appendChild(productCard);
+           })
+            
+            renderPaginationContainer(a.length);
+            
+        }
+
+        function renderPaginationContainer(totalProductNumber){
+            paginationContainer.innerHTML='';
+           let PageNumber=totalProductNumber/PageSize+1;
+           for(let i=0;i<PageNumber;i++){
+            const pageBtn=document.createElement('div');
+            pageBtn.className="page";
+            pageBtn.textContent=i+1;
+            paginationContainer.appendChild(pageBtn);
+            pageBtn.addEventListener('click',()=>{
+                currentPage=i+1;
+                renderProductsContainer();
+            })
+           }
+        }
+
+        renderProductsContainer()
+        </script>
+</body>
+</html>
